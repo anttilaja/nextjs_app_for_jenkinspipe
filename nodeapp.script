@@ -1,0 +1,48 @@
+pipeline { 
+    agent any 
+    stages {
+		stage ('startPipeLine'){
+			steps {
+				wrap([$class: 'BuildUser']) {
+					sh 'echo "${BUILD_USER}"'
+
+				}
+			}
+		}
+		
+		stage('Checkout') {
+		    steps {
+				deleteDir()
+		    	checkout scm
+			}
+        }
+		
+        stage('Install dependencies') {
+		    steps {
+				sh 'npm install'
+			}
+        }
+
+
+
+        stage('Run tests') {
+		    steps {
+				sh 'npm test'
+			}
+        }
+
+				
+    }	
+		
+	post {
+        always { 
+            echo 'I will always say Hello again!'
+        }
+		success{
+			sh label: 'msg to slack', script: '/var/lib/hfof/scripts/sendMessageTeams.sh  -s success -j "${JOB_NAME}" -u "${BUILD_USER}" -b "${BUILD_ID}" -r "${BRANCH}" -e "${ENV}" -m "${JOB_NAME} revision: ${BRANCH} asennettu ${ENV} ympäristöön." '
+		}
+		unsuccessful{		
+			sh label: 'msg to slack', script: '/var/lib/hfof/scripts/sendMessageTeams.sh  -s unsuccessful -j "${JOB_NAME}" -u "${BUILD_USER}" -b "${BUILD_ID}" -r "${BRANCH}" -e "${ENV}" -m "${JOB_NAME} revision: ${BRANCH} asennus ${ENV} ympäristöön epäonnistui. Ota yhteyttä ympäristön ylläpitoon."'
+		}	
+    }
+}
