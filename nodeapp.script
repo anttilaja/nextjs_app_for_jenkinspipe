@@ -16,7 +16,10 @@ pipeline {
 		
         stage('Install dependencies') {
 		    steps {
-				sh 'npm install'
+				nodejs(nodeJSInstallationName: 'nodeJS') {
+					sh 'node -v'
+					sh 'npm install'
+				}
 			}
         }
 
@@ -24,7 +27,9 @@ pipeline {
 
         stage('Run tests') {
 		    steps {
-				sh 'npm test'
+				nodejs(nodeJSInstallationName: 'nodeJS') {
+					sh 'npm test'
+				}
 			}
         }
 
